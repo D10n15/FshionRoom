@@ -43,10 +43,12 @@ function App() {
 
   const loadStore = async () => {
     try {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('stores')
         .select('*')
+        .eq('owner_id', user.id)  // ← LA ÚNICA LÍNEA QUE SE AGREGA
         .maybeSingle();
+
 
       if (error && error.code !== 'PGRST116') throw error;
       setStore(data);

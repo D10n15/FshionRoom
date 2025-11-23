@@ -47,7 +47,7 @@ function App() {
       const { data, error } = await supabase
         .from('stores')
         .select('*')
-        .eq('owner_id', user.id)   // ← ESTO ESTÁ PERFECTO POR QUE IMPIDE QUE EL USUARIO NUEVO VEA LO DEL USUARIO ANTIGUO.
+        .eq('user_id', user.id)   // ← ESTO ESTÁ PERFECTO POR QUE IMPIDE QUE EL USUARIO NUEVO VEA LO DEL USUARIO ANTIGUO.
         .maybeSingle();
   
       if (error && error.code !== 'PGRST116') {

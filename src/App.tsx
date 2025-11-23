@@ -43,19 +43,22 @@ function App() {
 
   const loadStore = async () => {
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('stores')
         .select('*')
-        .eq('owner_id', user.id)  // ← LA ÚNICA LÍNEA QUE SE AGREGA
+        .eq('owner_id', user.id)   // ← ESTO ESTÁ PERFECTO POR QUE IMPIDE QUE EL USUARIO NUEVO VEA LO DEL USUARIO ANTIGUO.
         .maybeSingle();
-
-
-      if (error && error.code !== 'PGRST116') throw error;
+  
+      if (error && error.code !== 'PGRST116') {
+        throw error;
+      }
+  
       setStore(data);
     } catch (error) {
       console.error('Error loading store:', error);
     }
   };
+
 
   if (loading) {
     return (

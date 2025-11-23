@@ -17,15 +17,15 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
 
-  useEffect(() => {
+    useEffect(() => {
     checkUser();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        loadStore();
-      }
-    });
+  }, []);
+  
+  useEffect(() => {
+    if (user) {
+      loadStore();
+    }
+  }, [user]);
 
     return () => {
       authListener.subscription.unsubscribe();
@@ -43,6 +43,7 @@ function App() {
 
   const loadStore = async () => {
     try {
+      if (!user) return null;
       const { data, error } = await supabase
         .from('stores')
         .select('*')

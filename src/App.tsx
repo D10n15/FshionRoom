@@ -42,22 +42,20 @@ function App() {
   };
 
   const loadStore = async () => {
-    try {
-      if (!user) return null;
-      const { data, error } = await supabase
-        .from('stores')
-        .select('*')
-        .eq('user_id', user.id)   // ← ESTO ESTÁ PERFECTO POR QUE IMPIDE QUE EL USUARIO NUEVO VEA LO DEL USUARIO ANTIGUO.
-        .maybeSingle();
+    if (!user) return; // <-- SÚPER importante
   
-      if (error && error.code !== 'PGRST116') {
-        throw error;
-      }
+    const { data, error } = await supabase
+      .from('stores')
+      .select('*')
+      .eq('user_id', user.id) // asegúrate de usar el campo correcto
+      .maybeSingle();
   
-      setStore(data);
-    } catch (error) {
-      console.error('Error loading store:', error);
+    if (error) {
+      console.error("Error loading store:", error);
+      return;
     }
+  
+    setStore(data);
   };
 
 

@@ -25,7 +25,7 @@ export default function StoreSetup({ onStoreCreated }: StoreSetupProps) {
       if (!user) throw new Error('No authenticated user');
 
       const { error: insertError } = await supabase.from('stores').insert({
-        owner_id: user.id,    // ← ESTO ES UNA CORRECION QUE ME VOLVIO LOCO HAHAHAHAHAHA
+        user_id: user.id,    // ← ESTO ES UNA CORRECION QUE ME VOLVIO LOCO HAHAHAHAHAHA
         name: formData.name,
         description: formData.description,
         domain: formData.domain || null,

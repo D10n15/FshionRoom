@@ -17,47 +17,49 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
 
-    useEffect(() => {
-    checkUser();
-  }, []);
-  
+  // 1️⃣ Cargar el usuario al iniciar
   useEffect(() => {
-    if (user) {
-      loadStore();
-    }
-  }, [user]);
+    const getUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
+      setLoading(false);
+    };
+
+    getUser();
+
+    // Listener de cambios de sesión
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
 
     return () => {
       authListener.subscription.unsubscribe();
     };
   }, []);
 
-  const checkUser = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    setUser(session?.user ?? null);
-    if (session?.user) {
-      await loadStore();
+  // 2️⃣ Cargar la tienda SOLO cuando el usuario exista
+  useEffect(() => {
+    if (user) {
+      loadStore();
     }
-    setLoading(false);
-  };
+  }, [user]);
 
   const loadStore = async () => {
-    if (!user) return; // <-- SÚPER importante
-  
+    if (!user) return;
+
     const { data, error } = await supabase
       .from('stores')
       .select('*')
-      .eq('user_id', user.id) // asegúrate de usar el campo correcto
+      .eq('user_id', user.id)
       .maybeSingle();
-  
+
     if (error) {
       console.error("Error loading store:", error);
       return;
     }
-  
+
     setStore(data);
   };
-
 
   if (loading) {
     return (

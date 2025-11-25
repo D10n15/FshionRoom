@@ -2,6 +2,19 @@ import { useEffect, useState } from 'react';
 import { Heart, Share2, MessageCircle, Store, Sparkles, HelpCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
+
+const CATEGORIES = [
+  { id: 'camisas', name: 'Camisas', icon: '👕' },
+  { id: 'pantalones', name: 'Pantalones', icon: '👖' },
+  { id: 'zapatos', name: 'Zapatos', icon: '👞' },
+  { id: 'gorras', name: 'Gorras', icon: '🧢' },
+  { id: 'reloj', name: 'Reloj', icon: '⏰' },
+  { id: 'anillos', name: 'Anillos', icon: '💍' },
+  { id: 'pulseras', name: 'Pulseras', icon: '⌚' },
+  { id: 'otro', name: 'Otro', icon: '📦' },
+];
+
+
 interface FeedPost {
   id: string;
   product_id: string;
@@ -23,9 +36,8 @@ interface FeedPost {
     company_email: string;
     company_whatsapp: string;
     currency: string;
+    category: string;
   };
-  isLiked?: boolean;
-  like_count?: number;
 }
 
 type SalesFeedProps = {
@@ -34,8 +46,10 @@ type SalesFeedProps = {
 
 export default function SalesFeed({ userId }: SalesFeedProps) {
   const [feedPosts, setFeedPosts] = useState<FeedPost[]>([]);
+  const [filteredPosts, setFilteredPosts] = useState<FeedPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'featured'>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [selectedPost, setSelectedPost] = useState<FeedPost | null>(null);
 
@@ -43,110 +57,40 @@ export default function SalesFeed({ userId }: SalesFeedProps) {
     loadFeedPosts();
   }, [filter]);
 
-  const fetchFeed = async () => {
-    const { data, error } = await supabase
-      .from('sales_feed')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false });
+  useEffect(() => {
+    let filtered = feedPosts;
 
-    if (error) {
-      console.error('Error cargando feed:', error);
-      return;
+    if (filter === 'featured') {
+      filtered = filtered.filter(p => p.is_featured);
     }
 
-    setFeed(data || []);
-  };
-  
-  const handleLike = async (postId: string, isLiked?: boolean, likeCount: number) => {
-    try {
-
-      // 1. Revisar si ya existe el like
-      const { data: existing } = await supabase
-        .from('feed_likes')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('post_id', postId)
-        .maybeSingle();
-
-      if (existing) {
-        // YA DIO LIKE → quitarlo  
-        await supabase
-          .from('feed_likes')
-          .delete()
-          .eq('id', existing.id);
-
-        await supabase
-          .from('sales_feed')
-          .update({ like_count: likeCount - 1 })
-          .eq('id', postId);
-
-        setFeedPosts(prev =>
-          prev.map(p =>
-            p.id === postId
-              ? { ...p, isLiked: false, like_count: likeCount - 1 }
-              : p
-          )
-        );
-
-        return;
-      }
-
-      // 2. NO EXISTE EL LIKE → agregarlo
-      await supabase
-        .from('feed_likes')
-        .insert({ user_id: userId, post_id: postId });
-
-      await supabase
-        .from('sales_feed')
-        .update({ like_count: likeCount + 1 })
-        .eq('id', postId);
-
-      setFeedPosts(prev =>
-        prev.map(p =>
-          p.id === postId
-            ? { ...p, isLiked: true, like_count: likeCount + 1 }
-            : p
-        )
-      );
-
-    } catch (err) {
-      console.error("Error toggling like:", err);
+    if (selectedCategory) {
+      filtered = filtered.filter(p => p.products?.category === selectedCategory);
     }
-  };
 
+    setFilteredPosts(filtered);
+  }, [feedPosts, filter, selectedCategory]);
 
   const loadFeedPosts = async () => {
     try {
       setLoading(true);
       let query = supabase
-      .from('sales_feed')
-      .select(`
-        id,
-        product_id,
-        store_id,
-        title,
-        description,
-        image_url,
-        price,
-        view_count,
-        share_count,
-        is_featured,
-        created_at,
-        stores:store_id (
-          name,
-          logo_url
-        ),
-        products:product_id (
-          company_name,
-          company_nit,
-          company_email,
-          company_whatsapp,
-          currency
-        )
-      `)
-      .eq('user_id', userId)  // 🔥 ESTE ES EL QUE FALTABA
-      .order('created_at', { ascending: false });
+        .from('sales_feed')
+        .select(`
+          id,
+          product_id,
+          title,
+          description,
+          image_url,
+          price,
+          view_count,
+          share_count,
+          is_featured,
+          created_at,
+          stores(name, logo_url),
+          products(company_name, company_nit, company_email, company_whatsapp, currency, category)
+        `)
+        .order('created_at', { ascending: false });
 
       if (filter === 'featured') {
         query = query.eq('is_featured', true);
@@ -217,7 +161,7 @@ export default function SalesFeed({ userId }: SalesFeedProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-900">Feed de Ventas</h2>
         <div className="flex space-x-2">
           <button
@@ -244,21 +188,54 @@ export default function SalesFeed({ userId }: SalesFeedProps) {
         </div>
       </div>
 
-      {feedPosts.length === 0 ? (
+      <div className="mb-8">
+        <div className="flex items-center space-x-2 mb-4">
+          <Filter className="w-5 h-5 text-gray-700" />
+          <h3 className="text-lg font-semibold text-gray-900">Filtrar por Categoría</h3>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setSelectedCategory(null)}
+            className={`px-4 py-2 rounded-lg font-medium transition-all ${
+              selectedCategory === null
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            Ver Todo
+          </button>
+          {CATEGORIES.map(cat => (
+            <button
+              key={cat.id}
+              onClick={() => setSelectedCategory(cat.id)}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                selectedCategory === cat.id
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <span>{cat.icon}</span>
+              <span>{cat.name}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {filteredPosts.length === 0 ? (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
           <MessageCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <h3 className="text-xl font-semibold text-gray-900 mb-2">
-            {filter === 'featured' ? 'Sin publicaciones destacadas' : 'Sin publicaciones'}
+            {filter === 'featured' ? 'Sin publicaciones destacadas' : 'Sin publicaciones en esta categoría'}
           </h3>
           <p className="text-gray-600">
             {filter === 'featured'
               ? 'Aún no hay publicaciones destacadas'
-              : 'Sé el primero en compartir una publicación'}
+              : 'Intenta seleccionar otra categoría'}
           </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {feedPosts.map((post) => (
+          {filteredPosts.map((post) => (
             <div
               key={post.id}
               className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all group"
@@ -334,16 +311,10 @@ export default function SalesFeed({ userId }: SalesFeedProps) {
                   </span>
                 </div>
 
-                  <button
-                    onClick={() => handleLike(post.id, post.isLiked, post.like_count || 0,)}
-                    className={`flex items-center justify-center space-x-1 px-3 py-2 rounded-lg transition-colors border border-gray-200 
-                      ${post.isLiked ? 'text-red-600 bg-red-50' : 'text-gray-700 hover:bg-gray-50'}
-                    `}
-                  >
-                    <Heart className={`w-4 h-4 ${post.isLiked ? 'fill-red-600 text-red-600' : ''}`} />
-                    <span className="text-xs font-medium hidden sm:inline">
-                      {post.like_count || 0}
-                    </span>
+                <div className="grid grid-cols-3 gap-2">
+                  <button className="flex items-center justify-center space-x-1 px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors border border-gray-200">
+                    <Heart className="w-4 h-4" />
+                    <span className="text-xs font-medium hidden sm:inline">Me gusta</span>
                   </button>
                   <button
                     onClick={() => handleShareClick(post)}
@@ -364,6 +335,7 @@ export default function SalesFeed({ userId }: SalesFeedProps) {
                   </button>
                 </div>
               </div>
+            </div>
           ))}
         </div>
       )}

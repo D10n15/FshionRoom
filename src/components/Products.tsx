@@ -656,4 +656,3 @@ export default function Products({ storeId, storeName = 'Mi Tienda' }: ProductsP
     </div>
   );
 }
-}

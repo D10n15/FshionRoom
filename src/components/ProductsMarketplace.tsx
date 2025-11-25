@@ -14,7 +14,20 @@ interface MarketplaceProduct {
   company_nit: string;
   company_email: string;
   company_whatsapp: string;
+  category: string;
 }
+
+const CATEGORIES = [
+  { id: 'camisas', name: 'Camisas', icon: '👕' },
+  { id: 'pantalones', name: 'Pantalones', icon: '👖' },
+  { id: 'zapatos', name: 'Zapatos', icon: '👞' },
+  { id: 'gorras', name: 'Gorras', icon: '🧢' },
+  { id: 'reloj', name: 'Reloj', icon: '⏰' },
+  { id: 'anillos', name: 'Anillos', icon: '💍' },
+  { id: 'pulseras', name: 'Pulseras', icon: '⌚' },
+  { id: 'otro', name: 'Otro', icon: '📦' },
+];
+
 
 interface HelpRequest {
   name: string;
@@ -39,6 +52,14 @@ export default function ProductsMarketplace() {
     loadProducts();
   }, []);
 
+  useEffect(() => {
+    if (selectedCategory) {
+      setFilteredProducts(products.filter(p => p.category === selectedCategory));
+    } else {
+      setFilteredProducts(products);
+    }
+  }, [selectedCategory, products]);
+
   const loadProducts = async () => {
     try {
       setLoading(true);
@@ -55,7 +76,8 @@ export default function ProductsMarketplace() {
           company_name,
           company_nit,
           company_email,
-          company_whatsapp
+          company_whatsapp,
+          category
         `)
         .eq('is_active', true)
         .order('created_at', { ascending: false });
@@ -118,15 +140,48 @@ export default function ProductsMarketplace() {
           <p className="text-xl text-gray-600">Descubre los mejores productos de nuestros vendedores</p>
         </div>
 
-        {products.length === 0 ? (
+        <div className="mb-8">
+          <div className="flex items-center space-x-2 mb-4">
+            <Filter className="w-5 h-5 text-gray-700" />
+            <h2 className="text-lg font-semibold text-gray-900">Filtrar por Categoría</h2>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setSelectedCategory(null)}
+              className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                selectedCategory === null
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              Ver Todo
+            </button>
+            {CATEGORIES.map(cat => (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.id)}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                  selectedCategory === cat.id
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                <span>{cat.icon}</span>
+                <span>{cat.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {filteredProducts.length === 0 ? (
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
             <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Sin productos disponibles</h3>
-            <p className="text-gray-600">Vuelve pronto para ver nuevos productos</p>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">Sin productos en esta categoría</h3>
+            <p className="text-gray-600">Intenta seleccionar otra categoría</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.map((product) => (
+            {filteredProducts.map((product) => (
               <div
                 key={product.id}
                 className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all group"

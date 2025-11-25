@@ -195,6 +195,7 @@ export default function Orders({ storeId }: OrdersProps) {
                   <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Origen</th>
                   <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Fecha</th>
                   <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Acciones</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Categoria</th>
                 </tr>
               </thead>
               <tbody>
@@ -281,6 +282,18 @@ export default function Orders({ storeId }: OrdersProps) {
                   value={formData.total_amount}
                   onChange={(e) => setFormData({ ...formData, total_amount: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Productos</label>
+                <input
+                  type="text"
+                  value={formData.products}
+                  onChange={(e) => setFormData({ ...formData, products: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  placeholder="Ej: 1 camiseta M, 2 relojes, perfume Dior..."
                   required
                 />
               </div>

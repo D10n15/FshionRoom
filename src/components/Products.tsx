@@ -16,6 +16,17 @@ const CURRENCIES = [
   { code: 'MXN', symbol: '€', name: 'Pesos Mexicanos' },
 ];
 
+const CATEGORIES = [
+  { id: 'camisas', name: 'Camisas', icon: '👕' },
+  { id: 'pantalones', name: 'Pantalones', icon: '👖' },
+  { id: 'zapatos', name: 'Zapatos', icon: '👞' },
+  { id: 'gorras', name: 'Gorras', icon: '🧢' },
+  { id: 'reloj', name: 'Reloj', icon: '⏰' },
+  { id: 'anillos', name: 'Anillos', icon: '💍' },
+  { id: 'pulseras', name: 'Pulseras', icon: '⌚' },
+  { id: 'otro', name: 'Otro', icon: '📦' },
+];
+
 type ProductsProps = {
   storeId: string;
   storeName?: string;
@@ -42,6 +53,7 @@ export default function Products({ storeId, storeName = 'Mi Tienda' }: ProductsP
     company_nit: '',
     company_email: '',
     company_whatsapp: '',
+    category: 'otro',
   });
 
   useEffect(() => {
@@ -85,6 +97,7 @@ export default function Products({ storeId, storeName = 'Mi Tienda' }: ProductsP
             company_nit: formData.company_nit,
             company_email: formData.company_email,
             company_whatsapp: formData.company_whatsapp,
+            category: formData.category,
             updated_at: new Date().toISOString(),
           })
           .eq('id', editingProduct.id);
@@ -104,6 +117,7 @@ export default function Products({ storeId, storeName = 'Mi Tienda' }: ProductsP
           company_nit: formData.company_nit,
           company_email: formData.company_email,
           company_whatsapp: formData.company_whatsapp,
+          category: formData.category,
         }).select().single();
 
         if (error) throw error;
@@ -114,7 +128,7 @@ export default function Products({ storeId, storeName = 'Mi Tienda' }: ProductsP
 
       setShowModal(false);
       setEditingProduct(null);
-      setFormData({ name: '', description: '', price: '', stock: '', image_url: '', is_active: true, currency: 'MXN', company_name: '', company_nit: '', company_email: '', company_whatsapp: '' });
+      setFormData({ name: '', description: '', price: '', stock: '', image_url: '', is_active: true, currency: 'MXN', company_name: '', company_nit: '', company_email: '', company_whatsapp: '', category: 'otro' });
       loadProducts();
     } catch (error) {
       console.error('Error saving product:', error);
@@ -135,6 +149,7 @@ export default function Products({ storeId, storeName = 'Mi Tienda' }: ProductsP
       company_nit: product.company_nit || '',
       company_email: product.company_email || '',
       company_whatsapp: product.company_whatsapp || '',
+      category: product.category || 'otro',
     });
     setUploadMethod('url');
     setShowModal(true);
@@ -330,6 +345,27 @@ export default function Products({ storeId, storeName = 'Mi Tienda' }: ProductsP
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                   rows={3}
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">Categoría</label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {CATEGORIES.map(cat => (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, category: cat.id })}
+                      className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all ${
+                        formData.category === cat.id
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-gray-200 bg-gray-50 hover:border-gray-300'
+                      }`}
+                    >
+                      <span className="text-2xl mb-1">{cat.icon}</span>
+                      <span className="text-xs font-medium text-gray-700 text-center">{cat.name}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className="grid grid-cols-3 gap-4">
@@ -619,4 +655,5 @@ export default function Products({ storeId, storeName = 'Mi Tienda' }: ProductsP
       )}
     </div>
   );
+}
 }

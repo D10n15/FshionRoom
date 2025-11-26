@@ -35,6 +35,7 @@ interface HelpRequest {
   message: string;
 }
 
+
 export default function ProductsMarketplace() {
   const [products, setProducts] = useState<MarketplaceProduct[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,7 +43,8 @@ export default function ProductsMarketplace() {
   const [showShareLink, setShowShareLink] = useState<string | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [filteredProducts, setFilteredProducts] = useState(products);
   const [helpData, setHelpData] = useState<HelpRequest>({
     name: '',
     email: '',

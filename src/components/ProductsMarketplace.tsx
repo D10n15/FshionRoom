@@ -55,7 +55,7 @@ export default function ProductsMarketplace() {
 
   useEffect(() => {
     if (selectedCategory) {
-      setFilteredProducts(products.filter(p => p.category === selectedCategory));
+      setFilteredProducts(products.filter(p => p.category_id === selectedCategory));
     } else {
       setFilteredProducts(products);
     }

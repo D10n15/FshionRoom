@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Heart, Share2, MessageCircle, Store, Sparkles, HelpCircle } from 'lucide-react';
+import { Heart, Share2, MessageCircle, Store, Sparkles, Filter, HelpCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+
+
 
 
 const CATEGORIES = [

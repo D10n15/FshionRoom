@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Heart, Share2, MessageCircle, Package, HelpCircle, Copy, Check } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import Filter from "@/components/Filter";
+import Filter from "./Filter";
 
 interface MarketplaceProduct {
   id: string;

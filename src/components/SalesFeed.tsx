@@ -52,6 +52,8 @@ export default function SalesFeed({ userId }: SalesFeedProps) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [selectedPost, setSelectedPost] = useState<FeedPost | null>(null);
+  //  ESTA LÍNEA ES LA QUE FALTABA
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
   useEffect(() => {
     loadFeedPosts();

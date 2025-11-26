@@ -41,6 +41,12 @@ export default function ProductsMarketplace() {
   const [filteredProducts, setFilteredProducts] = useState<MarketplaceProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+      return (
+      <div>
+        <Filter onSelectCategory={setSelectedCategory} />
+        {/* Aquí renderizas tus productos filtrados */}
+      </div>
+    );
   const [selectedProduct, setSelectedProduct] = useState<MarketplaceProduct | null>(null);
   const [showShareLink, setShowShareLink] = useState<string | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);

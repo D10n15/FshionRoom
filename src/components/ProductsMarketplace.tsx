@@ -44,8 +44,8 @@ export default function ProductsMarketplace() {
   const [showShareLink, setShowShareLink] = useState<string | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [filteredProducts, setFilteredProducts] = useState(products);
+  const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [helpData, setHelpData] = useState<HelpRequest>({
     name: '',
     email: '',
@@ -53,12 +53,21 @@ export default function ProductsMarketplace() {
   });
 
   useEffect(() => {
-    loadProducts();
+    const fetchProducts = async () => {
+      const { data, error } = await supabase.from("products").select("*");
+      if (!error) {
+        setProducts(data);
+        setFilteredProducts(data);
+      }
+    };
+
+    fetchProducts();
   }, []);
 
+// Filtrado
   useEffect(() => {
     if (selectedCategory) {
-      setFilteredProducts(products.filter(p => p.category_id === selectedCategory));
+      setFilteredProducts(products.filter((p) => p.category === selectedCategory));
     } else {
       setFilteredProducts(products);
     }
@@ -137,16 +146,9 @@ export default function ProductsMarketplace() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Tienda de Moda en Línea</h1>
-          <p className="text-xl text-gray-600">Descubre los mejores productos de nuestros vendedores</p>
-        </div>
-
         <div className="mb-8">
           <div className="flex items-center space-x-2 mb-4">
-            <Filter className="w-5 h-5 text-gray-700" />
+            <Filter onSelectCategory={(id) => setSelectedCategory(id)} />
             <h2 className="text-lg font-semibold text-gray-900">Filtrar por Categoría</h2>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -176,6 +178,7 @@ export default function ProductsMarketplace() {
             ))}
           </div>
         </div>
+
 
         {filteredProducts.length === 0 ? (
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">

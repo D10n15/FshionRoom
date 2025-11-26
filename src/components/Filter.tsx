@@ -2,12 +2,13 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 
-export default function Filter({ onSelectCategory }: { onSelectCategory: (id: string | null) => void }) {
+export default function Filter({ onSelectCategories }: { onSelectCategories: (id: string | null) => void }) {
   const [categories, setCategories] = useState<any[]>([]);
 
   useEffect(() => {
+    
     const fetchCategories = async () => {
-      const { data, error } = await supabase.from("category").select("*");
+      const { data, error } = await supabase.from("categories").select("*");
       if (!error && data) {
         setCategories(data);
       }
@@ -19,7 +20,7 @@ export default function Filter({ onSelectCategory }: { onSelectCategory: (id: st
     <div className="p-4 bg-white shadow rounded-md border">
       <h3 className="font-bold text-lg mb-3">Categorías</h3>
       <button
-        onClick={() => onSelectCategory(null)}
+        onClick={() => onSelectCategories(null)}
         className="block w-full text-left py-2 px-3 rounded-md hover:bg-gray-100"
       >
         Todas
@@ -27,7 +28,7 @@ export default function Filter({ onSelectCategory }: { onSelectCategory: (id: st
       {categories.map((c) => (
         <button
           key={c.id}
-          onClick={() => onSelectCategory(c.id)}
+          onClick={() => onSelectCategories(c.id)}
           className="block w-full text-left py-2 px-3 rounded-md hover:bg-gray-100"
         >
           {c.name}

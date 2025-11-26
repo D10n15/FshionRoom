@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Heart, Share2, MessageCircle, Store, Sparkles, Filter, HelpCircle } from 'lucide-react';
+import { Heart, Share2, MessageCircle, Store, Sparkles, Filter as FilterIcon, HelpCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+
 
 
 
@@ -54,8 +55,6 @@ export default function SalesFeed({ userId }: SalesFeedProps) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [selectedPost, setSelectedPost] = useState<FeedPost | null>(null);
-  //  ESTA LÍNEA ES LA QUE FALTABA
-  const [selectedCategory, setSelectedCategory] = useState(null);
 
   useEffect(() => {
     loadFeedPosts();
@@ -194,7 +193,7 @@ export default function SalesFeed({ userId }: SalesFeedProps) {
 
       <div className="mb-8">
         <div className="flex items-center space-x-2 mb-4">
-          <Filter className="w-5 h-5 text-gray-700" />
+          <FilterIcon className="w-5 h-5 text-gray-700" />
           <h3 className="text-lg font-semibold text-gray-900">Filtrar por Categoría</h3>
         </div>
         <div className="flex flex-wrap gap-2">

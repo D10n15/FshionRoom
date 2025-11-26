@@ -42,6 +42,7 @@ export default function ProductsMarketplace() {
   const [showShareLink, setShowShareLink] = useState<string | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [helpData, setHelpData] = useState<HelpRequest>({
     name: '',
     email: '',

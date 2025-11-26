@@ -1,6 +1,6 @@
 // src/components/Filter.tsx
 import { useEffect, useState } from "react";
-import { supabase } from "@/supabaseClient";
+import { supabase } from "../lib/supabase";
 
 export default function Filter({ onSelectCategory }: { onSelectCategory: (id: string | null) => void }) {
   const [categories, setCategories] = useState<any[]>([]);
@@ -27,7 +27,7 @@ export default function Filter({ onSelectCategory }: { onSelectCategory: (id: st
       {categories.map((c) => (
         <button
           key={c.id}
-          onClick={() => onSelectCategory(c.name)}
+          onClick={() => onSelectCategory(c.id)}
           className="block w-full text-left py-2 px-3 rounded-md hover:bg-gray-100"
         >
           {c.name}

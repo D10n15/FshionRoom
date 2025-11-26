@@ -3,7 +3,6 @@ import { Heart, Share2, MessageCircle, Package, HelpCircle, Copy, Check } from '
 import { supabase } from '../lib/supabase';
 import Filter from "./Filter";
 
-
 interface MarketplaceProduct {
   id: string;
   name: string;
@@ -41,12 +40,6 @@ export default function ProductsMarketplace() {
   const [filteredProducts, setFilteredProducts] = useState<MarketplaceProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-      return (
-      <div>
-        <Filter onSelectCategory={setSelectedCategory} />
-        {/* Aquí renderizas tus productos filtrados */}
-      </div>
-    );
   const [selectedProduct, setSelectedProduct] = useState<MarketplaceProduct | null>(null);
   const [showShareLink, setShowShareLink] = useState<string | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
@@ -151,10 +144,14 @@ export default function ProductsMarketplace() {
 
         <div className="mb-8">
           <div className="flex items-center space-x-2 mb-4">
-            <Filter className="w-5 h-5 text-gray-700" />
+            <Package className="w-5 h-5 text-gray-700" />
             <h2 className="text-lg font-semibold text-gray-900">Filtrar por Categoría</h2>
           </div>
-          <div className="flex flex-wrap gap-2">
+
+          {/* Componente de filtro reutilizable (usa la tabla category desde BD) */}
+          <Filter onSelectCategory={setSelectedCategory} />
+
+          <div className="flex flex-wrap gap-2 mt-4">
             <button
               onClick={() => setSelectedCategory(null)}
               className={`px-4 py-2 rounded-lg font-medium transition-all ${

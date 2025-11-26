@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/supabaseClient";
 
-export default function Filter({ onSelectCategory }: { onSelectCategory: (id: number | null) => void }) {
+export default function Filter({ onSelectCategory }: { onSelectCategory: (id: string | null) => void }) {
   const [categories, setCategories] = useState<any[]>([]);
 
   useEffect(() => {
@@ -29,7 +29,7 @@ export default function Filter({ onSelectCategory }: { onSelectCategory: (id: nu
       {categories.map((c) => (
         <button
           key={c.id}
-          onClick={() => onSelectCategory(c.id)}
+          onClick={() => onSelectCategory(c.name)}   {/* ← CAMBIO */}
           className="block w-full text-left py-2 px-3 rounded-md hover:bg-gray-100"
         >
           {c.name}

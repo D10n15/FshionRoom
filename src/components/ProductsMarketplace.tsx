@@ -18,17 +18,6 @@ interface MarketplaceProduct {
   category: string;
 }
 
-const CATEGORIES = [
-  { id: 'camisas', name: 'Camisas', icon: '👕' },
-  { id: 'pantalones', name: 'Pantalones', icon: '👖' },
-  { id: 'zapatos', name: 'Zapatos', icon: '👞' },
-  { id: 'gorras', name: 'Gorras', icon: '🧢' },
-  { id: 'reloj', name: 'Reloj', icon: '⏰' },
-  { id: 'anillos', name: 'Anillos', icon: '💍' },
-  { id: 'pulseras', name: 'Pulseras', icon: '⌚' },
-  { id: 'otro', name: 'Otro', icon: '📦' },
-];
-
 interface HelpRequest {
   name: string;
   email: string;
@@ -42,28 +31,34 @@ export default function ProductsMarketplace() {
   const [showShareLink, setShowShareLink] = useState<string | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
-  const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<any>(null);
+  const [filteredProducts, setFilteredProducts] = useState<MarketplaceProduct[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
   const [helpData, setHelpData] = useState<HelpRequest>({
-    name: '',
-    email: '',
-    message: '',
+    name: "",
+    email: "",
+    message: "",
   });
 
-  // load products
+  // Load products from supabase
   useEffect(() => {
     const fetchProducts = async () => {
       const { data, error } = await supabase.from("products").select("*");
-      if (!error) {
+
+      if (error) {
+        console.error("Error cargando productos:", error);
+      } else {
         setProducts(data);
         setFilteredProducts(data);
       }
+
+      setLoading(false);
     };
 
     fetchProducts();
   }, []);
 
-  // filter by category
+  // Category filtering
   useEffect(() => {
     if (selectedCategory) {
       setFilteredProducts(products.filter((p) => p.category === selectedCategory));
@@ -84,10 +79,13 @@ export default function ProductsMarketplace() {
   };
 
   const contactCompany = (product: MarketplaceProduct) => {
-    const text = `Hola, me interesa el producto: ${product.name}. Precio: ${product.currency} ${product.price.toFixed(2)}`;
+    const text = `Hola, me interesa el producto: ${product.name}. Precio: ${product.currency} ${product.price.toFixed(
+      2
+    )}`;
+
     window.open(
-      `https://wa.me/${product.company_whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(text)}`,
-      '_blank'
+      `https://wa.me/${product.company_whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(text)}`,
+      "_blank"
     );
   };
 
@@ -110,55 +108,49 @@ export default function ProductsMarketplace() {
           <Filter onSelectCategory={(id) => setSelectedCategory(id)} />
           <h2 className="text-lg font-semibold text-gray-900">Filtrar por Categoría</h2>
         </div>
-
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => setSelectedCategory(null)}
-            className={`px-4 py-2 rounded-lg font-medium transition-all ${
-              selectedCategory === null ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
-          >
-            Ver Todo
-          </button>
-
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setSelectedCategory(cat.id)}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                selectedCategory === cat.id
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              <span>{cat.icon}</span>
-              <span>{cat.name}</span>
-            </button>
-          ))}
-        </div>
       </div>
 
-      {/* GRID PRODUCTOS */}
+      {/* PRODUCT GRID */}
       {filteredProducts.length === 0 ? (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
           <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">Sin productos en esta categoría</h3>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">Sin productos</h3>
           <p className="text-gray-600">Intenta seleccionar otra categoría</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredProducts.map((product) => (
-            <div key={product.id} className="bg-white rounded-xl shadow-sm border border-gray-100">
-              {/* CARD… */}
+            <div key={product.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+              <img
+                src={product.image_url}
+                alt={product.name}
+                className="w-full h-48 object-cover rounded-lg mb-4"
+              />
+
+              <h3 className="font-bold text-lg">{product.name}</h3>
+              <p className="text-gray-600 text-sm">{product.description}</p>
+
+              <div className="mt-3 font-semibold text-blue-600 text-lg">
+                {product.currency} {product.price}
+              </div>
+
+              <div className="flex items-center justify-between mt-4">
+                <button
+                  onClick={() => contactCompany(product)}
+                  className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+                >
+                  Contactar
+                </button>
+
+                <button
+                  onClick={() => setShowShareLink(generateShareLink(product))}
+                  className="flex items-center px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200"
+                >
+                  <Share2 className="w-5 h-5 mr-2" /> Compartir
+                </button>
+              </div>
             </div>
           ))}
-        </div>
-      )}
-
-      {/* MODAL DE AYUDA */}
-      {showHelpModal && selectedProduct && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          {/* modal */}
         </div>
       )}
     </div>
